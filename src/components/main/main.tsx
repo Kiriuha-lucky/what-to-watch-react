@@ -5,18 +5,25 @@ import { fetchFilms, fetchPromoFilm } from '../../store/api-actions';
 import { FilmsList } from '../films-list/films-list';
 import { useAppDispatch } from './../../hooks/index';
 import { Spinner } from './../spinner/spinner';
+import { setCurrentFilms, setGenres } from './main.utils';
+import './main.css';
 
 export function Main(): JSX.Element {
   const filmsList = useAppSelector(({ films }) => films);
   const promoFilm = useAppSelector(({ promoFilm }) => promoFilm);
-  console.log(filmsList);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [activeGenre, setActiveGenre] = useState('All genres');
+
+  const MAX_FILMS_ON_PAGE = 8;
+  const [countFilms, setCountFilms] = useState(MAX_FILMS_ON_PAGE);
+
 
   const dispatch = useAppDispatch();
 
   const fetchData = useCallback(async () => {
     await dispatch(fetchFilms());
     await dispatch(fetchPromoFilm());
+
     setIsLoaded(true);
   }, []);
 
@@ -28,7 +35,13 @@ export function Main(): JSX.Element {
     return <Spinner />;
   }
 
-  console.log(typeof filmsList);
+  const genres = setGenres(filmsList);
+  const currentFilms = setCurrentFilms(filmsList, activeGenre);
+  const sliceCurrentFilms = currentFilms.slice(0, countFilms);
+  const handleChangeGenre = function (genre: string) {
+    setCountFilms(MAX_FILMS_ON_PAGE);
+    return setActiveGenre(genre);
+  }
 
   return (
     <>
@@ -102,63 +115,23 @@ export function Main(): JSX.Element {
         <section className="catalog">
           <h2 className="catalog__title visually-hidden">Catalog</h2>
           <ul className="catalog__genres-list">
-            <li className="catalog__genres-item catalog__genres-item--active">
-              <a href="#" className="catalog__genres-link">
-                All genres
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Comedies
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Crime
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Documentary
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Dramas
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Horror
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Kids &amp; Family
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Romance
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Sci-Fi
-              </a>
-            </li>
-            <li className="catalog__genres-item">
-              <a href="#" className="catalog__genres-link">
-                Thrillers
-              </a>
-            </li>
+            {genres.map((genre) => {
+              return (
+                <li key={genre} className={`catalog__genres-item ${activeGenre === genre && 'catalog__genres-item--active'}`}>
+                  <button className="catalog__genres-link" onClick={() => handleChangeGenre(genre)}>
+                    {genre}
+                  </button>
+                </li>)
+            })}
           </ul>
-          <FilmsList filmsList={filmsList}/>
-          <div className="catalog__more">
-            <button className="catalog__button" type="button">
-              Show more
-            </button>
-          </div>
+          <FilmsList filmsList={sliceCurrentFilms} />
+          {currentFilms.length > countFilms && (
+            <div className="catalog__more">
+              <button className="catalog__button" type="button" onClick={() => setCountFilms((prev) => prev += MAX_FILMS_ON_PAGE)}>
+                Show more
+              </button>
+            </div>
+          )}
         </section>
         <footer className="page-footer">
           <div className="logo">
