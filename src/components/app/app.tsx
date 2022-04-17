@@ -1,4 +1,6 @@
 import { Route, BrowserRouter, Routes } from 'react-router-dom';
+import { AppRoutes } from '../../types/routes.types';
+import { Film } from '../film/film';
 import { Main } from '../main/main';
 
 export function App(): JSX.Element {
@@ -9,6 +11,10 @@ export function App(): JSX.Element {
         <Route
           path='/'
           element={<Main />}
+        />
+        <Route
+          path={AppRoutes.Film}
+          element={<Film />}
         />
         {/* <Route
           path={AppRoutes.Login}

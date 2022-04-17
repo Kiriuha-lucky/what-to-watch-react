@@ -1,4 +1,4 @@
-export enum APIRoute {
+export enum APIRoutes {
   Films = '/films',
   PromoFilm ='/promo',
 }
