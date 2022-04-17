@@ -1,13 +1,14 @@
 /*eslint-disable*/
 import { useCallback, useEffect, useState } from 'react';
 import { useAppSelector } from '../../hooks';
-import { fetchFilms } from '../../store/api-actions';
+import { fetchFilms, fetchPromoFilm } from '../../store/api-actions';
 import { FilmsList } from '../films-list/films-list';
 import { useAppDispatch } from './../../hooks/index';
 import { Spinner } from './../spinner/spinner';
 
 export function Main(): JSX.Element {
   const filmsList = useAppSelector(({ films }) => films);
+  const promoFilm = useAppSelector(({ promoFilm }) => promoFilm);
   console.log(filmsList);
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -15,6 +16,7 @@ export function Main(): JSX.Element {
 
   const fetchData = useCallback(async () => {
     await dispatch(fetchFilms());
+    await dispatch(fetchPromoFilm());
     setIsLoaded(true);
   }, []);
 
@@ -33,8 +35,8 @@ export function Main(): JSX.Element {
       <section className="film-card">
         <div className="film-card__bg">
           <img
-            src="img/bg-the-grand-budapest-hotel.jpg"
-            alt="The Grand Budapest Hotel"
+            src={promoFilm.backgroundImage}
+            alt={promoFilm.name}
           />
         </div>
         <h1 className="visually-hidden">WTW</h1>
@@ -66,17 +68,17 @@ export function Main(): JSX.Element {
           <div className="film-card__info">
             <div className="film-card__poster">
               <img
-                src="img/the-grand-budapest-hotel-poster.jpg"
-                alt="The Grand Budapest Hotel poster"
+                src={promoFilm.posterImage}
+                alt={promoFilm.name}
                 width={218}
                 height={327}
               />
             </div>
             <div className="film-card__desc">
-              <h2 className="film-card__title">The Grand Budapest Hotel</h2>
+              <h2 className="film-card__title">{promoFilm.name}</h2>
               <p className="film-card__meta">
-                <span className="film-card__genre">Drama</span>
-                <span className="film-card__year">2014</span>
+                <span className="film-card__genre">{promoFilm.genre}</span>
+                <span className="film-card__year">{promoFilm.released}</span>
               </p>
               <div className="film-card__buttons">
                 <button className="btn btn--play film-card__button" type="button">
