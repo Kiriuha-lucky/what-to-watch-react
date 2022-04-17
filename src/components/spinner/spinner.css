@@ -1,0 +1,36 @@
+@keyframes loading {
+  from {
+    font-size: 20px;
+  }
+  50% {
+    font-size: 35px;
+  }
+  to {
+    font-size: 20px;
+  }
+}
+
+.spinner__logo {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translateX(-50%) translateY(-50%);
+  z-index: 500;
+}
+
+.spinner__logo .logo__link {
+  border-color: white;
+  width: 15vw;
+  height: 10vw;
+  background-color: #000;
+}
+
+.spinner__logo .logo__letter {
+  color: white !important;
+  font-size: 35px;
+  animation-name: loading;
+  animation-duration: 1s;
+  animation-iteration-count: infinite;
+}
+
+
