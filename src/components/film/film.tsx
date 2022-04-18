@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
+import { AppRoutes } from '../../types/routes.types';
 import { Spinner } from '../spinner/spinner';
 import { useAppDispatch } from './../../hooks/index';
 
@@ -34,7 +35,7 @@ export function Film(): JSX.Element {
           <h1 className="visually-hidden">WTW</h1>
           <header className="page-header film-card__head">
             <div className="logo">
-              <a href="main.html" className="logo__link">
+              <a href={AppRoutes.Main} className="logo__link">
                 <span className="logo__letter logo__letter--1">W</span>
                 <span className="logo__letter logo__letter--2">T</span>
                 <span className="logo__letter logo__letter--3">W</span>
