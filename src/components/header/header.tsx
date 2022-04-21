@@ -1,4 +1,8 @@
+import { Link } from 'react-router-dom';
+import { logoutAction } from '../../store/api-actions';
+import { AuthorizationStatus } from '../../types/auth.types';
 import { AppRoutes } from '../../types/routes.types';
+import { useAppSelector, useAppDispatch } from './../../hooks/index';
 
 interface HeaderProps {
   children?: JSX.Element,
@@ -6,6 +10,14 @@ interface HeaderProps {
 }
 
 export function Header({ children, viewLogin = true }: HeaderProps): JSX.Element {
+  const authStatus = useAppSelector(({ auth }) => auth);
+  const dispatch = useAppDispatch();
+  const logout = function (evt: React.SyntheticEvent) {
+    evt.preventDefault();
+
+    dispatch(logoutAction());
+  };
+
   return (
     <header className="page-header user-page__head">
       <div className="logo">
@@ -16,17 +28,24 @@ export function Header({ children, viewLogin = true }: HeaderProps): JSX.Element
         </a>
       </div>
       {children}
-      {viewLogin &&
+      {authStatus === AuthorizationStatus.Auth ? (viewLogin &&
         <ul className="user-block">
           <li className="user-block__item">
             <div className="user-block__avatar">
-              <img src="img/avatar.jpg" alt="User avatar" width={63} height={63} />
+              <Link to='/mylist' >
+                <img src="img/avatar.jpg" alt="User avatar" width={63} height={63} />
+              </Link>
             </div>
           </li>
           <li className="user-block__item">
-            <a className="user-block__link">Sign out</a>
+            <a onClick={logout} className="user-block__link">Sign out</a>
           </li>
-        </ul>}
+        </ul>) : (
+        <div className="user-block">
+          <Link to='/login' className="user-block__link">Sign in</Link>
+        </div>
+      )}
+
     </header>
   );
 }
