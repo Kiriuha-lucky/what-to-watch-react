@@ -2,6 +2,7 @@ import { useRef } from 'react';
 import { Film } from './../../types/film.types';
 
 export function FilmCard({
+  id,
   name,
   previewImage,
   previewVideoLink,
@@ -37,7 +38,7 @@ export function FilmCard({
         />
       </div>
       <h3 className='small-film-card__title'>
-        <a className='small-film-card__link' href='film-page.html'>
+        <a className='small-film-card__link' href={`/films/${id}`}>
           {name}
         </a>
       </h3>
