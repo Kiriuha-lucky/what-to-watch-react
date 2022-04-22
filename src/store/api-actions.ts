@@ -2,7 +2,7 @@ import { errorHandle } from '../services/error-handle';
 import { setFilms } from './films/films';
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import { AppDispatch, State } from '../types/state.types';
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { Film } from './../types/film.types';
 import { APIRoutes } from '../types/api.types';
 import { setPromoFilm } from './promo-film/promo-film';
@@ -12,6 +12,7 @@ import { AuthorizationStatus } from '../types/auth.types';
 import { dropToken, saveToken } from '../services/token';
 import { AuthData } from '../types/auth-data.types';
 import { UserData } from '../types/user-data.types';
+import { setFilm, setReviews, setSimilarFilms } from './film-page/film-page';
 
 export const fetchFilms = createAsyncThunk<void, undefined, {
   dispatch: AppDispatch,
@@ -94,4 +95,36 @@ export const logoutAction = createAsyncThunk<void, undefined, {
     dispatch(clearUser());
   },
 );
+
+export const fetchFilmAction = createAsyncThunk<void, number, {
+  dispatch: AppDispatch,
+  state: State,
+  extra: AxiosInstance
+}>(
+  'fetchOfferAction',
+  async (id, { dispatch, extra: api }) => {
+    function getFilm() {
+      return api.get<Film>(`${APIRoutes.Films}/${id}`);
+    }
+
+    function getReviews() {
+      return api.get(`${APIRoutes.Comments}/${id}`);
+    }
+
+    function getSimilarFilms() {
+      return api.get(`${APIRoutes.Films}/${id}/similar`);
+    }
+
+    await Promise.all([getFilm(), getReviews(), getSimilarFilms()])
+      .then(axios.spread((d1, d2, d3) => {
+        dispatch(setFilm(d1.data));
+        dispatch(setReviews(d2.data));
+        dispatch(setSimilarFilms(d3.data));
+      }))
+      .catch((Error) => {
+        errorHandle(Error);
+      });
+  },
+);
+
 

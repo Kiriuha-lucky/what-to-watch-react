@@ -3,4 +3,5 @@ export enum APIRoutes {
   PromoFilm ='/promo',
   Login = '/login',
   Logout = '/logout',
+  Comments = '/comments'
 }

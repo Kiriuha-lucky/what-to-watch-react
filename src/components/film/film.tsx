@@ -1,16 +1,24 @@
 import { useCallback, useEffect, useState } from 'react';
-import { AppRoutes } from '../../types/routes.types';
+import { Link, useParams } from 'react-router-dom';
+import { fetchFilmAction } from '../../store/api-actions';
+import { FilmsList } from '../films-list/films-list';
+import { Footer } from '../footer/footer';
+import { Header } from '../header/header';
 import { Spinner } from '../spinner/spinner';
-import { useAppDispatch } from './../../hooks/index';
+import { useAppDispatch, useAppSelector } from './../../hooks/index';
+import './film.css';
+import { ratingToText, timeToText } from './film.utils';
 
 /*eslint-disable*/
 export function Film(): JSX.Element {
+  const filmId = Number(useParams().id);
   const [isLoaded, setIsLoaded] = useState(false);
   const dispatch = useAppDispatch();
+  const { currentFilm, reviews, similarFilms } = useAppSelector(({ filmPage }) => filmPage);
+  const [currentTab, setCurrentTab] = useState('overview');
 
   const fetchData = useCallback(async () => {
-    // await dispatch(fetchFilms());
-
+    await dispatch(fetchFilmAction(filmId));
     setIsLoaded(true);
   }, []);
 
@@ -22,55 +30,95 @@ export function Film(): JSX.Element {
     return <Spinner />;
   }
 
+  const toogleTab = function () {
+    switch (currentTab) {
+      case 'overview':
+        return (<><div className="film-rating">
+          <div className="film-rating__score">{currentFilm.rating}</div>
+          <p className="film-rating__meta">
+            <span className="film-rating__level">{ratingToText(currentFilm.rating)}</span>
+            <span className="film-rating__count">{currentFilm.scoresCount} ratings</span>
+          </p>
+        </div><div className="film-card__text">
+            <p>{currentFilm.description}</p>
+            <p className="film-card__director"><strong>Director: {currentFilm.director}</strong></p>
+            <p className="film-card__starring"><strong>Starring: {currentFilm.starring.join(', ')}</strong></p>
+          </div></>);
+      case 'details':
+        return (<div className="film-card__text film-card__row">
+          <div className="film-card__text-col">
+            <p className="film-card__details-item">
+              <strong className="film-card__details-name">Director</strong>
+              <span className="film-card__details-value">{currentFilm.director}</span>
+            </p>
+            <p className="film-card__details-item">
+              <strong className="film-card__details-name">Starring</strong>
+              <span className="film-card__details-value">
+                {currentFilm.starring.join(', ')}
+              </span>
+            </p>
+          </div>
+          <div className="film-card__text-col">
+            <p className="film-card__details-item">
+              <strong className="film-card__details-name">Run Time</strong>
+              <span className="film-card__details-value">{timeToText(currentFilm.runTime)}</span>
+            </p>
+            <p className="film-card__details-item">
+              <strong className="film-card__details-name">Genre</strong>
+              <span className="film-card__details-value">{currentFilm.genre}</span>
+            </p>
+            <p className="film-card__details-item">
+              <strong className="film-card__details-name">Released</strong>
+              <span className="film-card__details-value">{currentFilm.released}</span>
+            </p>
+          </div>
+        </div >);
+      case 'reviews':
+        return (<div className="film-card__reviews film-card__row">
+          <div className="film-card__reviews-col">
+            {reviews.map((review) => (
+              <div key={review.id} className="review">
+                <blockquote className="review__quote">
+                  <p className="review__text">{review.comment}</p>
+                  <footer className="review__details">
+                    <cite className="review__author">{review.user.name}</cite>
+                    <time className="review__date" dateTime={new Date(review.date).toISOString().split('T')[0]}>{`${new Date(review.date).toLocaleString('EN', { month: 'long' })}, ${new Date(review.date).getDate() - 1}, ${new Date(review.date).getFullYear()}`}</time>
+                  </footer>
+                </blockquote>
+                <div className="review__rating">{review.rating}</div>
+              </div>
+            ))}
+          </div>
+        </div>);
+    }
+  }
+
   return (
     <>
       <section className="film-card film-card--full">
         <div className="film-card__hero">
           <div className="film-card__bg">
             <img
-              src="img/bg-the-grand-budapest-hotel.jpg"
-              alt="The Grand Budapest Hotel"
+              src={currentFilm.backgroundImage}
+              alt={currentFilm.name}
             />
           </div>
           <h1 className="visually-hidden">WTW</h1>
-          <header className="page-header film-card__head">
-            <div className="logo">
-              <a href={AppRoutes.Main} className="logo__link">
-                <span className="logo__letter logo__letter--1">W</span>
-                <span className="logo__letter logo__letter--2">T</span>
-                <span className="logo__letter logo__letter--3">W</span>
-              </a>
-            </div>
-            <ul className="user-block">
-              <li className="user-block__item">
-                <div className="user-block__avatar">
-                  <img
-                    src="img/avatar.jpg"
-                    alt="User avatar"
-                    width={63}
-                    height={63}
-                  />
-                </div>
-              </li>
-              <li className="user-block__item">
-                <a className="user-block__link">Sign out</a>
-              </li>
-            </ul>
-          </header>
+          <Header />
           <div className="film-card__wrap">
             <div className="film-card__desc">
-              <h2 className="film-card__title">The Grand Budapest Hotel</h2>
+              <h2 className="film-card__title">{currentFilm.name}</h2>
               <p className="film-card__meta">
-                <span className="film-card__genre">Drama</span>
-                <span className="film-card__year">2014</span>
+                <span className="film-card__genre">{currentFilm.genre}</span>
+                <span className="film-card__year">{currentFilm.released}</span>
               </p>
               <div className="film-card__buttons">
-                <button className="btn btn--play film-card__button" type="button">
+                <Link to={`/player/${currentFilm.id}`} className="btn btn--play film-card__button">
                   <svg viewBox="0 0 19 19" width={19} height={19}>
                     <use xlinkHref="#play-s" />
                   </svg>
                   <span>Play</span>
-                </button>
+                </Link>
                 <button className="btn btn--list film-card__button" type="button">
                   <svg viewBox="0 0 19 20" width={19} height={20}>
                     <use xlinkHref="#add" />
@@ -88,8 +136,8 @@ export function Film(): JSX.Element {
           <div className="film-card__info">
             <div className="film-card__poster film-card__poster--big">
               <img
-                src="img/the-grand-budapest-hotel-poster.jpg"
-                alt="The Grand Budapest Hotel poster"
+                src={currentFilm.posterImage}
+                alt={currentFilm.name}
                 width={218}
                 height={327}
               />
@@ -97,62 +145,24 @@ export function Film(): JSX.Element {
             <div className="film-card__desc">
               <nav className="film-nav film-card__nav">
                 <ul className="film-nav__list">
-                  <li className="film-nav__item">
-                    <a href="#" className="film-nav__link">
+                  <li className={`film-nav__item ${currentTab === 'overview' && 'film-nav__item--active'}`}>
+                    <button onClick={() => setCurrentTab('overview')} className="film-nav__link">
                       Overview
-                    </a>
+                    </button>
                   </li>
-                  <li className="film-nav__item film-nav__item--active">
-                    <a href="#" className="film-nav__link">
+                  <li className={`film-nav__item ${currentTab === 'details' && 'film-nav__item--active'}`}>
+                    <button onClick={() => setCurrentTab('details')} className="film-nav__link">
                       Details
-                    </a>
+                    </button>
                   </li>
-                  <li className="film-nav__item">
-                    <a href="#" className="film-nav__link">
+                  <li className={`film-nav__item ${currentTab === 'reviews' && 'film-nav__item--active'}`}>
+                    <button onClick={() => setCurrentTab('reviews')} className="film-nav__link">
                       Reviews
-                    </a>
+                    </button>
                   </li>
                 </ul>
               </nav>
-              <div className="film-card__text film-card__row">
-                <div className="film-card__text-col">
-                  <p className="film-card__details-item">
-                    <strong className="film-card__details-name">Director</strong>
-                    <span className="film-card__details-value">Wes Anderson</span>
-                  </p>
-                  <p className="film-card__details-item">
-                    <strong className="film-card__details-name">Starring</strong>
-                    <span className="film-card__details-value">
-                      Bill Murray, <br />
-                      Edward Norton, <br />
-                      Jude Law, <br />
-                      Willem Dafoe, <br />
-                      Saoirse Ronan, <br />
-                      Tony Revoloru, <br />
-                      Tilda Swinton, <br />
-                      Tom Wilkinson, <br />
-                      Owen Wilkinson, <br />
-                      Adrien Brody, <br />
-                      Ralph Fiennes, <br />
-                      Jeff Goldblum
-                    </span>
-                  </p>
-                </div>
-                <div className="film-card__text-col">
-                  <p className="film-card__details-item">
-                    <strong className="film-card__details-name">Run Time</strong>
-                    <span className="film-card__details-value">1h 39m</span>
-                  </p>
-                  <p className="film-card__details-item">
-                    <strong className="film-card__details-name">Genre</strong>
-                    <span className="film-card__details-value">Comedy</span>
-                  </p>
-                  <p className="film-card__details-item">
-                    <strong className="film-card__details-name">Released</strong>
-                    <span className="film-card__details-value">2014</span>
-                  </p>
-                </div>
-              </div>
+              {toogleTab()}
             </div>
           </div>
         </div>
@@ -160,74 +170,11 @@ export function Film(): JSX.Element {
       <div className="page-content">
         <section className="catalog catalog--like-this">
           <h2 className="catalog__title">More like this</h2>
-          <div className="catalog__films-list">
-            <article className="small-film-card catalog__films-card">
-              <div className="small-film-card__image">
-                <img
-                  src="img/fantastic-beasts-the-crimes-of-grindelwald.jpg"
-                  alt="Fantastic Beasts: The Crimes of Grindelwald"
-                  width={280}
-                  height={175}
-                />
-              </div>
-              <h3 className="small-film-card__title">
-                <a className="small-film-card__link" href="film-page.html">
-                  Fantastic Beasts: The Crimes of Grindelwald
-                </a>
-              </h3>
-            </article>
-            <article className="small-film-card catalog__films-card">
-              <div className="small-film-card__image">
-                <img
-                  src="img/bohemian-rhapsody.jpg"
-                  alt="Bohemian Rhapsody"
-                  width={280}
-                  height={175}
-                />
-              </div>
-              <h3 className="small-film-card__title">
-                <a className="small-film-card__link" href="film-page.html">
-                  Bohemian Rhapsody
-                </a>
-              </h3>
-            </article>
-            <article className="small-film-card catalog__films-card">
-              <div className="small-film-card__image">
-                <img src="img/macbeth.jpg" alt="Macbeth" width={280} height={175} />
-              </div>
-              <h3 className="small-film-card__title">
-                <a className="small-film-card__link" href="film-page.html">
-                  Macbeth
-                </a>
-              </h3>
-            </article>
-            <article className="small-film-card catalog__films-card">
-              <div className="small-film-card__image">
-                <img src="img/aviator.jpg" alt="Aviator" width={280} height={175} />
-              </div>
-              <h3 className="small-film-card__title">
-                <a className="small-film-card__link" href="film-page.html">
-                  Aviator
-                </a>
-              </h3>
-            </article>
-          </div>
+          <FilmsList filmsList={similarFilms.slice(0, 4)} />
         </section>
-        <footer className="page-footer">
-          <div className="logo">
-            <a href="main.html" className="logo__link logo__link--light">
-              <span className="logo__letter logo__letter--1">W</span>
-              <span className="logo__letter logo__letter--2">T</span>
-              <span className="logo__letter logo__letter--3">W</span>
-            </a>
-          </div>
-          <div className="copyright">
-            <p>© 2019 What to watch Ltd.</p>
-          </div>
-        </footer>
+        <Footer />
       </div>
     </>
-
   );
 }
 
