@@ -3,6 +3,7 @@ import { auth } from './auth/auth';
 import { filmPage } from './film-page/film-page';
 import { films } from './films/films';
 import { promoFilm } from './promo-film/promo-film';
+import { myList } from './my-list/my-list';
 
 
 export const rootReducer = combineReducers({
@@ -10,4 +11,5 @@ export const rootReducer = combineReducers({
   promoFilm: promoFilm.reducer,
   auth: auth.reducer,
   filmPage: filmPage.reducer,
+  myList: myList.reducer,
 });

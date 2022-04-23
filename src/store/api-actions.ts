@@ -13,6 +13,7 @@ import { dropToken, saveToken } from '../services/token';
 import { AuthData } from '../types/auth-data.types';
 import { UserData } from '../types/user-data.types';
 import { setFilm, setReviews, setSimilarFilms } from './film-page/film-page';
+import { setMyListFilms } from './my-list/my-list';
 
 export const fetchFilms = createAsyncThunk<void, undefined, {
   dispatch: AppDispatch,
@@ -124,6 +125,22 @@ export const fetchFilmAction = createAsyncThunk<void, number, {
       .catch((Error) => {
         errorHandle(Error);
       });
+  },
+);
+
+export const fetchMyListFilms = createAsyncThunk<void, undefined, {
+  dispatch: AppDispatch,
+  state: State,
+  extra: AxiosInstance
+}>(
+  'fetchMyListFilms',
+  async (_arg, { dispatch, extra: api }) => {
+    try {
+      const { data } = await api.get<Film[]>(APIRoutes.MyList);
+      dispatch(setMyListFilms(data));
+    } catch (error) {
+      errorHandle(error);
+    }
   },
 );
 

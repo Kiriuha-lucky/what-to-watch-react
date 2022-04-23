@@ -1,8 +1,17 @@
+/*eslint-disable*/
+import { useNavigate, useParams } from 'react-router-dom';
+
 export function Player(): JSX.Element {
+  const filmId = Number(useParams().id);
+  const navigate = useNavigate();
+  function handleExit() {
+    return navigate(-1);
+  }
+
   return (
     <div className="player">
       <video src="#" className="player__video" poster="img/player-poster.jpg" />
-      <button type="button" className="player__exit">
+      <button onClick={handleExit} type="button" className="player__exit">
         Exit
       </button>
       <div className="player__controls">
